@@ -5,11 +5,13 @@ if (2 != $_SERVER['argc']) {
 	die("Usage: {$_SERVER['argv'][0]} FILE");
 }
 
-$include_path = get_include_path()
-	. PATH_SEPARATOR . 'lib'
-	. PATH_SEPARATOR . 'classes';
+$dirname = dirname(__FILE__);
 
-$pear_path_file = dirname(__FILE__) . '/pear-path.php';
+$include_path = get_include_path()
+	. PATH_SEPARATOR . $dirname . 'lib'
+	. PATH_SEPARATOR . $dirname . 'classes';
+
+$pear_path_file = $dirname . '/pear-path.php';
 
 if (file_exists($pear_path_file)) {
 	$include_path .= PATH_SEPARATOR . require $pear_path_file;
