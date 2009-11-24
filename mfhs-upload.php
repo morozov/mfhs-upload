@@ -8,8 +8,8 @@ if (2 != $_SERVER['argc']) {
 $dirname = dirname(__FILE__);
 
 $include_path = get_include_path()
-	. PATH_SEPARATOR . $dirname . 'lib'
-	. PATH_SEPARATOR . $dirname . 'classes';
+	. PATH_SEPARATOR . $dirname . '/lib'
+	. PATH_SEPARATOR . $dirname . '/classes';
 
 $pear_path_file = $dirname . '/pear-path.php';
 
