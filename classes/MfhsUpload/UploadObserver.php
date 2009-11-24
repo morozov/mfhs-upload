@@ -102,6 +102,16 @@ class MfhsUpload_UploadObserver implements SplObserver {
 	}
 
 	/**
+	 * Отображает получение заголовков. На самом деле нужно обработать событие
+	 * "onSentBody", которое на настоящий момент, в версии 0.5.1, не реализовано.
+	 *
+	 */
+	protected function onReceivedHeaders() {
+		// выводим перевод строки после того, как отработает индикатор загрузки
+		echo PHP_EOL;
+	}
+
+	/**
 	 * Возвращает объект-индикатор.
 	 *
 	 * @param integer $total
