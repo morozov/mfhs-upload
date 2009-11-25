@@ -26,4 +26,4 @@ require_once 'MfhsUpload/UploadAdapter.php';
 $adapter = new MfhsUpload_UploadAdapter('http://93.84.113.212:8082/cgi-bin/upload.cgi', $config['username']);
 $id = $adapter->upload($_SERVER['argv'][1]);
 
-echo $config['base_url'] . 'download.php?id=' . $id;
+echo $config['base_url'] . 'download.php?id=' . $id . PHP_EOL;
