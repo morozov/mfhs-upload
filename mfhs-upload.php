@@ -7,19 +7,12 @@ if (2 != $_SERVER['argc']) {
 
 $dirname = dirname(__FILE__);
 
-$include_path = get_include_path()
+set_include_path(get_include_path()
+	. PATH_SEPARATOR . getenv('HOME') . '/pear/php'
 	. PATH_SEPARATOR . $dirname . '/lib'
-	. PATH_SEPARATOR . $dirname . '/classes';
-
-$pear_path_file = $dirname . '/pear-path.php';
-
-if (file_exists($pear_path_file)) {
-	$include_path .= PATH_SEPARATOR . require $pear_path_file;
-}
+	. PATH_SEPARATOR . $dirname . '/classes');
 
 $config = require dirname(__FILE__) . '/config.php';
-
-set_include_path($include_path);
 
 require_once 'MfhsUpload/UploadAdapter.php';
 
