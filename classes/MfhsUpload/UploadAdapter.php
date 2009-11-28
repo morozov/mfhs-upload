@@ -74,6 +74,9 @@ class MfhsUpload_UploadAdapter {
 		$request = new HTTP_Request2($url);
 
 		return $request->setMethod(HTTP_Request2::METHOD_POST)
+			->setConfig(array(
+				'connect_timeout' => 60,
+			))
 			->addPostParameter($params)
 			->send()
 			->getBody();
