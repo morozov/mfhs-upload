@@ -16,7 +16,12 @@ $config = require dirname(__FILE__) . '/config.php';
 
 require_once 'MfhsUpload/UploadAdapter.php';
 
-$adapter = new MfhsUpload_UploadAdapter('http://93.84.113.212:8082/cgi-bin/upload.cgi', $config['username']);
-$id = $adapter->upload($_SERVER['argv'][1]);
+try {
+	$adapter = new MfhsUpload_UploadAdapter('http://93.84.113.212:8082/cgi-bin/upload.cgi', $config['username']);
+	$id = $adapter->upload($_SERVER['argv'][1]);
+	echo $config['base_url'] . 'download.php?id=' . $id;
+} catch (MfhsUpload_Exception $e) {
+	echo $e->getMessage();
+}
 
-echo $config['base_url'] . 'download.php?id=' . $id . PHP_EOL;
+echo PHP_EOL;

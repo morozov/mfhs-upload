@@ -112,6 +112,10 @@ class MfhsUpload_UploadAdapter {
 			}
 		}
 
+		if (null === $action) {
+			throw new MfhsUpload_Exception('Invalid server response: ' . PHP_EOL . $contents);
+		}
+
 		return array($action, $params);
 	}
 
