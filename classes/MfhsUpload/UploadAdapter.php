@@ -11,6 +11,11 @@ require_once 'HTTP/Request2.php';
 require_once 'MfhsUpload/UploadObserver.php';
 
 /**
+ * @see MfhsUpload_Exception
+ */
+require_once 'MfhsUpload/Exception.php';
+
+/**
  * @see HtmlParser
  */
 require_once 'htmlparser.inc.php';
