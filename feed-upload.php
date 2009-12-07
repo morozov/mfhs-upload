@@ -4,28 +4,13 @@
 require dirname(__FILE__) . '/includes/startup.php';
 
 require_once 'XML/Feed.php';
+require_once 'Download/Registry.php';
 
 if (2 != $_SERVER['argc']) {
 	die("Usage: {$_SERVER['argv'][0]} URL");
 }
 
-function get_enclosures($url, $log) {
-
-	if (file_exists($log)) {
-		if (false === ($completed = @file($log))) {
-			throw new Exception('Couldn\'t import log file');
-		}
-		$completed = array_map('trim', $completed);
-	} else {
-		if (!touch($log)) {
-			throw new Exception('Couldn\'t create log file');
-		}
-		$completed = array();
-	}
-
-	if (!is_writable($log)) {
-		throw new Exception('Couldn\'t write to log file');
-	}
+function get_enclosures($url, Download_Registry $registry) {
 
 	try {
 		$feed = Xml_Feed::import($url);
@@ -33,26 +18,22 @@ function get_enclosures($url, $log) {
 		throw new Exception($e->getMessage());
 	}
 
-	$backup = error_reporting();
-	error_reporting($backup ^ ~E_STRICT);
-
-	$enclosures = array();
-
 	foreach ($feed as $entry) {
 		if (false !== ($enclosure = $entry->enclosure())
 			&& preg_match('/^(audio|video)\//', $enclosure['type'])) {
 			$url = $enclosure['url'];
-			// îòðåçàåì ëåâóþ QUERY_STRING èç àäðåñîâ íà rpod.ru
+			// Ð¾Ñ‚Ñ€ÐµÐ·Ð°ÐµÐ¼ Ð»ÐµÐ²ÑƒÑŽ QUERY_STRING Ð¸Ð· Ð°Ð´Ñ€ÐµÑÐ¾Ð² Ð½Ð° rpod.ru
 			if (0 === strpos($url, 'http://rpod.ru/')) {
 				$url = substr($url, 0, strpos($url, '?'));
 			}
-			$enclosures[] = $url;
+			if (!$registry->isRegistered($url)) {
+				echo $url . PHP_EOL;
+				$registry->register($url);
+			}
 		}
 	}
-
-	error_reporting($backup);
-
-	return $enclosures;
 }
 
-var_dump(get_enclosures($_SERVER['argv'][1], 'var/completed.log'));
+$registry = new Download_Registry('var/completed.log');
+
+get_enclosures($_SERVER['argv'][1], $registry);
