@@ -12,7 +12,7 @@ $config = require dirname(__FILE__) . '/config.php';
 require_once 'MfhsUpload/UploadAdapter.php';
 
 try {
-	$adapter = new MfhsUpload_UploadAdapter($config['base_url'], $config['username']);
+	$adapter = new MfhsUpload_UploadAdapter($config['upload_url'], $config['username']);
 	$id = $adapter->upload($_SERVER['argv'][1]);
 	echo $config['base_url'] . 'download.php?id=' . $id;
 } catch (MfhsUpload_Exception $e) {
