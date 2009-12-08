@@ -116,6 +116,11 @@ class MfhsUpload_UploadAdapter {
 						$value = $parser->iNodeValue;
 						$params[$param] = $value;
 						break;
+					// element <b> contains error message
+					case 'b':
+						$parser->parse();
+						throw new MfhsUpload_Exception('Server-side error: ' . stripslashes($parser->iNodeValue));
+						break;
 				}
 			}
 		}
