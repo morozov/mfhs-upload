@@ -32,12 +32,15 @@ class MfhsUpload_UploadAdapter {
 
 	public function upload($path) {
 
+		$backup = ini_set('default_socket_timeout', 300);
+
 		$response1 = $this->sendUploadRequest($path);
 
 		list($action, $params) = $this->parseUploadResponse($response1);
 
 		$response2 = $this->sendCompleteRequest($action, $params);
 
+		ini_set('default_socket_timeout', $backup);
 		return $this->parseCompleteResponse($response2);
 	}
 
@@ -58,7 +61,7 @@ class MfhsUpload_UploadAdapter {
 		return $request
 			->setMethod(HTTP_Request2::METHOD_POST)
 			->setConfig(array(
-				'timeout' => 86400,
+				'connect_timeout' => 300,
 			))
 			->addPostParameter(array(
 				'xmode'     => '2',
@@ -80,7 +83,7 @@ class MfhsUpload_UploadAdapter {
 
 		return $request->setMethod(HTTP_Request2::METHOD_POST)
 			->setConfig(array(
-				'connect_timeout' => 60,
+				'connect_timeout' => 300,
 			))
 			->addPostParameter($params)
 			->send()
