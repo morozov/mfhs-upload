@@ -1,11 +1,6 @@
 <?php
 
 /**
- * @see Download_Registry
- */
-require_once 'Download/Registry.php';
-
-/**
  * @see Xml_Feed
  */
 require_once 'XML/Feed.php';
@@ -20,19 +15,34 @@ require_once 'Download/Controller/Exception.php';
  */
 class Download_Controller {
 
+	protected $downloadAdapter;
+
+	protected $uploadAdapter;
+
+	protected $registry;
+
+	public function setDownloadAdapter($adapter) {
+		$this->downloadAdapter = $adapter;
+		return $this;
+	}
+
+	public function setUploadAdapter($adapter) {
+		$this->uploadAdapter = $adapter;
+		return $this;
+	}
+
+	public function setRegistry($registry) {
+		$this->registry = $registry;
+		return $this;
+	}
+
 	/**
 	 * Constructor.
 	 *
 	 * @param string file
 	 * @throws Download_Registry_Exception
 	 */
-	public function process($url, $log) {
-
-		try {
-			$registry = new Download_Registry($log);
-		} catch (Download_Registry_Exception $e) {
-			throw new Download_Controller_Exception($e->getMessage());
-		}
+	public function process($url) {
 
 		try {
 			$feed = Xml_Feed::import($url);
@@ -48,9 +58,15 @@ class Download_Controller {
 				if (0 === strpos($url, 'http://rpod.ru/')) {
 					$url = substr($url, 0, strpos($url, '?'));
 				}
-				if (!$registry->isRegistered($url)) {
-					echo $url . PHP_EOL;
-					$registry->register($url);
+				if (!$this->registry->isRegistered($url)) {
+					try {
+						$this->downloadAdapter->download($url);
+					} catch (XML_Feed_Exception $e) {
+						// currently just skipping the current itaration
+						continue;
+					}
+					echo $this->uploadAdapter->upload($url);
+					$this->registry->register($url);
 				}
 			}
 		}
