@@ -13,7 +13,6 @@ try {
 	$ctlr = new Download_Controller();
 	$ctlr->process($_SERVER['argv'][1], 'var/completed.log');
 } catch (Download_Controller_Exception $e) {
-	echo $e->getMessage();
+	echo $e->getMessage() . PHP_EOL;
+	exit(1);
 }
-
-echo PHP_EOL;
