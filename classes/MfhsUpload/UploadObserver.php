@@ -121,9 +121,9 @@ class MfhsUpload_UploadObserver implements SplObserver {
 	 */
 	protected function getBar($total, $unit, $precision) {
 		return new Console_ProgressBar(
-			'%fraction%' . $unit . ' [%bar%] %percent% ETA: %estimate%',
+			'%percent% [%bar%] %fraction% ' . $unit . ' ETA: %estimate%',
 			'=>',
-			'-',
+			' ',
 			76,
 			$total,
 			array(
