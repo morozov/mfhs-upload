@@ -47,7 +47,7 @@ class Download_Adapter implements SplObserver {
 		switch ($event['name']) {
 			case 'receivedHeaders':
 				$response = $event['data'];
-				if ('2' != substr($response->getStatus(), 0, 1)) {
+				if (!in_array(substr($response->getStatus(), 0, 1), array('2', '3'))) {
 					throw new Download_Adapter_Exception($response->getStatus() . ' - ' . $response->getReasonPhrase());
 				}
 				if (!$filename = $this->getFilename($response)) {

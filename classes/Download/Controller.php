@@ -60,12 +60,13 @@ class Download_Controller {
 				}
 				if (!$this->registry->isRegistered($url)) {
 					try {
-						$this->downloadAdapter->download($url);
+						$tmp = $this->downloadAdapter->download($url);
 					} catch (XML_Feed_Exception $e) {
 						// currently just skipping the current itaration
 						continue;
 					}
-					echo $this->uploadAdapter->upload($url);
+					echo $this->uploadAdapter->upload($tmp);
+					unlink($tmp);
 					$this->registry->register($url);
 				}
 			}
