@@ -10,6 +10,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 chdir(dirname(__FILE__) . '/../classes');
 
 require_once dirname(__FILE__) . '/Download/RegistryTest.php';
+require_once dirname(__FILE__) . '/Download/AdapterTest.php';
 
 class AllTests {
 
@@ -20,6 +21,7 @@ class AllTests {
 	public static function suite() {
 		$suite = new PHPUnit_Framework_TestSuite('Splitter');
 		$suite->addTestSuite('Download_RegistryTest');
+		$suite->addTestSuite('Download_AdapterTest');
 		return $suite;
 	}
 }
