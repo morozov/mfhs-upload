@@ -22,10 +22,26 @@ class Download_Adapter implements SplObserver {
 	 */
 	protected $dir;
 
-	protected $fp;
-
+	/**
+	 * Target file path.
+	 *
+	 * @var string $target
+	 */
 	protected $target;
 
+	/**
+	 * Target file resource.
+	 *
+	 * @var resource $fp
+	 */
+	protected $fp;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $dir
+	 * @throws Download_Adapter_Exception
+	 */
 	public function __construct($dir) {
 		if (!is_dir($dir)) {
 			throw new Download_Adapter_Exception('"' . $dir . '" is not a directory');
@@ -33,6 +49,12 @@ class Download_Adapter implements SplObserver {
 		$this->dir = $dir;
 	}
 
+	/**
+	 * Downloads file from specified URL.
+	 *
+	 * @param string $url
+	 * @throws Download_Adapter_Exception
+	 */
 	public function download($url) {
 		$this->target = null;
 		$request = new HTTP_Request2($url, HTTP_Request2::METHOD_GET, array('store_body' => false));
@@ -41,6 +63,11 @@ class Download_Adapter implements SplObserver {
 		return $this->target;
 	}
 
+	/**
+	 * Implements SplObserver#update
+	 *
+	 * @param SplSubject $subject
+	 */
 	public function update(SplSubject $subject) {
 		$event = $subject->getLastEvent();
 
@@ -61,7 +88,10 @@ class Download_Adapter implements SplObserver {
 
 			case 'receivedBodyPart':
 			case 'receivedEncodedBodyPart':
-				fwrite($this->fp, $event['data']);
+				$written = fwrite($this->fp, $event['data']);
+				if ($written != strlen($event['data'])) {
+					throw new Download_Adapter_Exception("Cannot write to target file");
+				}
 				break;
 
 			case 'receivedBody':
@@ -70,7 +100,12 @@ class Download_Adapter implements SplObserver {
 		}
 	}
 
-	protected function getFilename($response) {
+	/**
+	 * Detects filename from response.
+	 *
+	 * @param HTTP_Request2_Response $response
+	 */
+	protected function getFilename(HTTP_Request2_Response $response) {
 
 		$matches = null;
 
@@ -83,9 +118,9 @@ class Download_Adapter implements SplObserver {
 					'/%s\s*=\s*(?(?=")"([^"]*)|([^;]*))/i',
 					preg_quote($directiveName)
 				),
-				// проверяем совпадение в искомом заголовке ответа
+				// try to find filename in header
 				$response->getHeader($headerName), $matches)) {
-				// достаем последнее из совпадений (т.к. RegExp - с условием)
+				// get the last of matches (because expr. has a condition)
 				return end($matches);
 			}
 		}
