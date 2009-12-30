@@ -42,11 +42,11 @@ class Mfhs_Registry implements Mfhs_Registry_Interface {
 		}
 
 		if (!$fp = @fopen($file, 'a+')) {
-			throw new Mfhs_Registry_Exception('Couldn\'t open registry file');
+			throw new Mfhs_Registry_Exception('Couldn\'t open registry file "' . $file . '"');
 		}
 
 		if (!@flock($fp, LOCK_EX | LOCK_NB)) {
-			throw new Mfhs_Registry_Exception('Registry file is already in use');
+			throw new Mfhs_Registry_Exception('Registry file "' . $file . '" is already in use');
 		}
 
 		$tmp = '';
