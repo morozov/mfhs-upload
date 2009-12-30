@@ -107,6 +107,7 @@ class Mfhs_Adapter_Download implements SplObserver {
 	 */
 	public function download($url) {
 		$this->target = null;
+		$this->fp = null;
 		$httpRequest = $this->getHttpRequest();
 		$httpRequest->setUrl($url)
 			->setMethod(HTTP_Request2::METHOD_GET)
@@ -135,13 +136,13 @@ class Mfhs_Adapter_Download implements SplObserver {
 					$filename = basename($subject->getUrl()->getPath());
 				}
 				$this->target = $this->dir . DIRECTORY_SEPARATOR . $filename;
-				if (!($this->fp = @fopen($this->target, 'wb'))) {
-					throw new Mfhs_Adapter_Download_Exception("Cannot open target file '{$this->target}'");
-				}
 				break;
 
 			case 'receivedBodyPart':
 			case 'receivedEncodedBodyPart':
+				if (!$this->fp && !($this->fp = @fopen($this->target, 'wb'))) {
+					throw new Mfhs_Adapter_Download_Exception("Cannot open target file '{$this->target}'");
+				}
 				$written = fwrite($this->fp, $event['data']);
 				if ($written != strlen($event['data'])) {
 					throw new Mfhs_Adapter_Download_Exception("Cannot write to target file");
