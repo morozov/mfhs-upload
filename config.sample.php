@@ -10,6 +10,6 @@ return array(
 		'dir' => 'tmp',
 	),
 	'feed' => array(
-		'log' => 'log/completed.log',
+		'log' => 'var/completed.log',
 	),
 );
