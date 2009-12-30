@@ -12,9 +12,9 @@ if (2 != $_SERVER['argc']) {
 $config = require dirname(__FILE__) . '/config.php';
 
 /**
- * @see Download_Registry
+ * @see Mfhs_Registry
  */
-require_once 'Download/Registry.php';
+require_once 'Mfhs/Registry.php';
 
 /**
  * @see Download_Adapter
@@ -27,7 +27,7 @@ try {
 	$ctlr = new Download_Controller();
 	$ctlr->setDownloadAdapter(new Download_Adapter('.'))
 		 ->setUploadAdapter(new MfhsUpload_UploadAdapter($config['upload_url'], $config['username']))
-		 ->setRegistry(new Download_Registry('var/completed.log'))
+		 ->setRegistry(new Mfhs_Registry('var/completed.log'))
 		 ->process($_SERVER['argv'][1]);
 } catch (Download_Controller_Exception $e) {
 	echo $e->getMessage() . PHP_EOL;

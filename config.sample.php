@@ -1,8 +1,15 @@
 <?php
 
 return array(
-	'base_url'   => 'http://hostname.tld/',
-	'upload_url' => 'http://hostname.tld/cgi-bin/upload.cgi',
-	'username'   => 'username',
-	'password'   => 'password',
+	'upload' => array(
+		'username'  => 'username',
+		'uploadUrl' => 'http://example.com/cgi-bin/upload.cgi',
+		'baseUrl'   => 'http://megashare.by/',
+	),
+	'download' => array(
+		'dir' => 'tmp',
+	),
+	'feed' => array(
+		'log' => 'log/completed.log',
+	),
 );

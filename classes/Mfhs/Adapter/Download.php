@@ -6,21 +6,28 @@
 require_once 'HTTP/Request2.php';
 
 /**
- * @see Download_Adapter_Exception
+ * @see Mfhs_Adapter_Download
  */
-require_once 'Download/Adapter/Exception.php';
+require_once 'Mfhs/Adapter/Download/Exception.php';
 
 /**
  * HTTP download adapter.
  */
-class Download_Adapter implements SplObserver {
+class Mfhs_Adapter_Download implements SplObserver {
+
+	/**
+	 * HTTP_Request2 instance.
+	 *
+	 * @var HTTP_Request2 $httpRequest
+	 */
+	protected $httpRequest;
 
 	/**
 	 * Directory to save file into.
 	 *
 	 * @var string $dir
 	 */
-	protected $dir;
+	protected $dir = '.';
 
 	/**
 	 * Target file path.
@@ -39,14 +46,57 @@ class Download_Adapter implements SplObserver {
 	/**
 	 * Constructor.
 	 *
-	 * @param string $dir
-	 * @throws Download_Adapter_Exception
+	 * @param Mfhs_Config $config
+	 * @throws Mfhs_Adapter_Download_Exception
 	 */
-	public function __construct($dir) {
+	public function __construct($config = null) {
+		if (isset($config->dir)) {
+			$this->setDir($config->dir);
+		}
+		if (isset($config->httpRequest)) {
+			$this->setHttpRequest($config->httpRequest);
+		}
+	}
+
+	/**
+	 * Sets download directory.
+	 *
+	 * @param  string $dir
+	 * @throws Mfhs_Adapter_Download_Exception
+	 * @return Mfhs_Adapter_Download
+	 */
+	public function setDir($dir) {
 		if (!is_dir($dir)) {
-			throw new Download_Adapter_Exception('"' . $dir . '" is not a directory');
+			throw new Mfhs_Adapter_Download_Exception('"' . $dir . '" is not a directory');
+		}
+		if (!is_writable($dir)) {
+			throw new Mfhs_Adapter_Download_Exception('"' . $dir . '" is not writable');
 		}
 		$this->dir = $dir;
+		return $this;
+	}
+
+	/**
+	 * Returns HTTP_Request2 instance.
+	 *
+	 * @return HTTP_Request2
+	 */
+	public function getHttpRequest() {
+		if (!$this->httpRequest instanceof HTTP_Request2) {
+			$this->httpRequest = new HTTP_Request2();
+		}
+		return $this->httpRequest;
+	}
+
+	/**
+	 * Sets HTTP_Request2 instance.
+	 *
+	 * @param HTTP_Request2 $httpRequest
+	 * @return Mfhs_Adapter_Download
+	 */
+	public function setHttpRequest(HTTP_Request2 $httpRequest) {
+		$this->httpRequest = $httpRequest;
+		return $this;
 	}
 
 	/**
@@ -57,9 +107,13 @@ class Download_Adapter implements SplObserver {
 	 */
 	public function download($url) {
 		$this->target = null;
-		$request = new HTTP_Request2($url, HTTP_Request2::METHOD_GET, array('store_body' => false));
-		$request->attach($this);
-		$request->send();
+		$httpRequest = $this->getHttpRequest();
+		$httpRequest->setUrl($url)
+			->setMethod(HTTP_Request2::METHOD_GET)
+			->setConfig('store_body', false);
+		$httpRequest->attach($this);
+		$httpRequest->send();
+		$httpRequest->detach($this);
 		return $this->target;
 	}
 
@@ -75,14 +129,14 @@ class Download_Adapter implements SplObserver {
 			case 'receivedHeaders':
 				$response = $event['data'];
 				if (!in_array(substr($response->getStatus(), 0, 1), array('2', '3'))) {
-					throw new Download_Adapter_Exception($response->getStatus() . ' - ' . $response->getReasonPhrase());
+					throw new Mfhs_Adapter_Download_Exception($response->getStatus() . ' - ' . $response->getReasonPhrase());
 				}
 				if (!$filename = $this->getFilename($response)) {
 					$filename = basename($subject->getUrl()->getPath());
 				}
 				$this->target = $this->dir . DIRECTORY_SEPARATOR . $filename;
 				if (!($this->fp = @fopen($this->target, 'wb'))) {
-					throw new Download_Adapter_Exception("Cannot open target file '{$target}'");
+					throw new Mfhs_Adapter_Download_Exception("Cannot open target file '{$this->target}'");
 				}
 				break;
 
@@ -90,7 +144,7 @@ class Download_Adapter implements SplObserver {
 			case 'receivedEncodedBodyPart':
 				$written = fwrite($this->fp, $event['data']);
 				if ($written != strlen($event['data'])) {
-					throw new Download_Adapter_Exception("Cannot write to target file");
+					throw new Mfhs_Adapter_Download_Exception("Cannot write to target file");
 				}
 				break;
 
