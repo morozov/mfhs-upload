@@ -127,7 +127,7 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 		$response2 = $this->sendCompleteRequest($action, $params);
 
 		ini_set('default_socket_timeout', $backup);
-		return $this->parseCompleteResponse($response2);
+		echo $this->parseCompleteResponse($response2) . PHP_EOL;
 	}
 
 	protected function sendUploadRequest($path) {
@@ -221,16 +221,17 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 	}
 
 	/**
-	 * Разбирает содержимое ответd сервера при завершении загрузки. Возвращает
-	 * код загруженного файла.
+	 * Разбирает содержимое ответа сервера при завершении загрузки. Возвращает
+	 * ссылку на страницу загрузки файла.
 	 *
 	 * @param string $contents
 	 * @return string
 	 */
 	protected function parseCompleteResponse($contents) {
 		$matches = null;
-		return preg_match('/code=([^&]+)/', $contents, $matches)
-			? $matches[1] : null;
+		return preg_match('/(https?):\/\/([^\/]+)\/index.php\?code=([^&]+)/', $contents, $matches)
+			? $matches[1] . '://'. $matches[2] . '/download.php?id=' . $matches[3]
+			: null;
 	}
 
 	/**
