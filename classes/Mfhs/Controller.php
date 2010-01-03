@@ -27,7 +27,7 @@ class Mfhs_Controller {
 		}
 
 		if (0 == count($paths)) {
-			die("Usage: {$_SERVER['argv'][0]} FILE");
+			die("Usage: {$_SERVER['argv'][0]} FILE" . PHP_EOL);
 		}
 
 		foreach ($paths as $path) {
