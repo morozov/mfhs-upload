@@ -6,9 +6,9 @@ return array(
 		'uploadUrl' => 'http://example.com/cgi-bin/upload.cgi',
 	),
 	'download' => array(
-		'dir' => 'tmp',
+		'dir' => dirname(__FILE__) . '/tmp',
 	),
 	'feed' => array(
-		'log' => 'var/completed.log',
+		'log' => dirname(__FILE__) . '/var/completed.log',
 	),
 );
