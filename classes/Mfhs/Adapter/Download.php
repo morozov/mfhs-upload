@@ -113,7 +113,10 @@ class Mfhs_Adapter_Download implements SplObserver {
 		$httpRequest = $this->getHttpRequest();
 		$httpRequest->setUrl($url)
 			->setMethod(HTTP_Request2::METHOD_GET)
-			->setConfig('store_body', false);
+			->setConfig(array(
+				'store_body'       => false,
+				'follow_redirects' => true,
+			));
 		$httpRequest->attach($this);
 		$httpRequest->send();
 		$httpRequest->detach($this);
