@@ -41,6 +41,12 @@ class Mfhs_Registry implements Mfhs_Registry_Interface {
 			throw new Mfhs_Registry_Exception('Directory provided');
 		}
 
+		$dirname = dirname($file);
+
+		if (!is_dir($dirname) && !mkdir($dirname, 0777, true)) {
+			throw new Mfhs_Registry_Exception('Couldn\'t create path to file "' . $file . '"');
+		}
+
 		if (!$fp = @fopen($file, 'a+')) {
 			throw new Mfhs_Registry_Exception('Couldn\'t open registry file "' . $file . '"');
 		}

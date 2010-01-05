@@ -61,7 +61,7 @@ class Mfhs_RegistryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Test construstor with non-existing file and writable directory.
+	 * Test constructor with non-existing file and writable directory.
 	 */
 	public function testConstructNoFileDirWritable() {
 		$registry = new Mfhs_Registry($this->file);
@@ -69,29 +69,45 @@ class Mfhs_RegistryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Test construstor with non-existing file and non-writable directory.
+	 * Test constructor with non-existing file and non-writable directory.
 	 */
 	public function testConstructNoFileDirNotWritable() {
+		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+			return;
+		}
+		chmod($this->dir, 0400);
 		$this->setExpectedException('Mfhs_Registry_Exception');
-		$registry = new Mfhs_Registry('/path/to/non/existing/dir');
+		$registry = new Mfhs_Registry($this->file);
 	}
 
 	/**
-	 * Test construstor with non-readable file.
+	 * Test constructor with non-readable file.
 	 */
-	/*public function testConstructFileNotReadable() {
+	public function testConstructFileNotReadable() {
+		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+			return;
+		}
 		$this->setExpectedException('Mfhs_Registry_Exception');
-	}*/
+		touch($this->file);
+		chmod($this->file, 0200);
+		$registry = new Mfhs_Registry($this->file);
+	}
 
 	/**
-	 * Test construstor with non-writable file.
+	 * Test constructor with non-writable file.
 	 */
-	/*public function testConstructFileNotWritable() {
+	public function testConstructFileNotWritable() {
+		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+			return;
+		}
 		$this->setExpectedException('Mfhs_Registry_Exception');
-	}*/
+		touch($this->file);
+		chmod($this->file, 0400);
+		$registry = new Mfhs_Registry($this->file);
+	}
 
 	/**
-	 * Test construstor with non-existing file and writable directory.
+	 * Test constructor with non-existing file and writable directory.
 	 */
 	public function testConstructDirectory() {
 		$this->setExpectedException('Mfhs_Registry_Exception');
@@ -100,11 +116,19 @@ class Mfhs_RegistryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Test construstor with correct file.
+	 * Test constructor with correct file.
 	 */
-	public function testConstructSuccess() {
+	public function testConstructExistingFile() {
 		touch($this->file);
 		$registry = new Mfhs_Registry($this->file);
+	}
+
+	/**
+	 * Test constructor with correct file.
+	 */
+	public function testConstructAutoCreatePath() {
+		$file = $this->dir . '/'. md5(time()) . '/'. md5(time()) . '/file.log';
+		$registry = new Mfhs_Registry($file);
 	}
 
 	public function testExistingKey() {

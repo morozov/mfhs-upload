@@ -66,11 +66,13 @@ class Mfhs_Adapter_Download implements SplObserver {
 	 * @return Mfhs_Adapter_Download
 	 */
 	public function setDir($dir) {
-		if (!is_dir($dir)) {
-			throw new Mfhs_Adapter_Download_Exception('"' . $dir . '" is not a directory');
-		}
-		if (!is_writable($dir)) {
-			throw new Mfhs_Adapter_Download_Exception('"' . $dir . '" is not writable');
+		if (file_exists($dir)) {
+			if (!is_dir($dir)) {
+				throw new Mfhs_Adapter_Download_Exception('"' . $dir . '" is not a directory');
+			}
+			if (!is_writable($dir)) {
+				throw new Mfhs_Adapter_Download_Exception('"' . $dir . '" is not writable');
+			}
 		}
 		$this->dir = $dir;
 		return $this;
@@ -134,6 +136,9 @@ class Mfhs_Adapter_Download implements SplObserver {
 				}
 				if (!$filename = $this->getFilename($response)) {
 					$filename = basename($subject->getUrl()->getPath());
+				}
+				if (!is_dir($this->dir) && !mkdir($this->dir, 0777, true)) {
+					throw new Mfhs_Adapter_Download_Exception('Couldn\'t create directory "' . $this->dir . '"');
 				}
 				$this->target = $this->dir . DIRECTORY_SEPARATOR . $filename;
 				break;
