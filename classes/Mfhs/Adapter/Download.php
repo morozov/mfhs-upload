@@ -140,6 +140,7 @@ class Mfhs_Adapter_Download implements SplObserver {
 				if (!$filename = $this->getFilename($response)) {
 					$filename = basename($subject->getUrl()->getPath());
 				}
+				$filename = rawurldecode($filename);
 				if (!is_dir($this->dir) && !mkdir($this->dir, 0777, true)) {
 					throw new Mfhs_Adapter_Download_Exception('Couldn\'t create directory "' . $this->dir . '"');
 				}
