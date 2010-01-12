@@ -8,14 +8,20 @@ class Mfhs_Controller {
 
 	public function process() {
 
-		$is_feed = false;
+		$is_feed  = false;
 		$paths = array();
+		$options = array(
+			'quiet' => false,
+		);
 
 		foreach (array_slice($_SERVER['argv'], 1) as $arg) {
 			if (0 === strpos($arg, '--')) {
 				switch ($arg) {
 					case '--feed':
 						$is_feed = true;
+						break;
+					case '--quiet':
+						$options['quiet'] = true;
 						break;
 					default:
 						die('Unknown option ' . $arg);
@@ -32,25 +38,25 @@ class Mfhs_Controller {
 
 		foreach ($paths as $path) {
 			if ($is_feed) {
-				$this->uploadFeed($path);
+				$this->uploadFeed($path, $options);
 			} elseif (0 === strpos($arg, 'http://') || 0 === strpos($arg, 'https://')) {
-				$this->uploadHttp($arg);
+				$this->uploadHttp($arg, $options);
 			} else {
-				$this->uploadLocal($arg);
+				$this->uploadLocal($arg, $options);
 			}
 		}
 	}
 
-	public function uploadLocal($path) {
-		$this->getLocalUploadAdapter()->upload($path);
+	public function uploadLocal($path, $options) {
+		$this->getLocalUploadAdapter($options)->upload($path);
 	}
 
-	public function uploadHttp($url) {
-		$this->getHttpUploadAdapter()->upload($url);
+	public function uploadHttp($url, $options) {
+		$this->getHttpUploadAdapter($options)->upload($url);
 	}
 
-	public function uploadFeed($url) {
-		$this->getFeedUploadAdapter()->upload($url);
+	public function uploadFeed($url, $options) {
+		$this->getFeedUploadAdapter($options)->upload($url);
 	}
 
 	/**
@@ -58,7 +64,7 @@ class Mfhs_Controller {
 	 *
 	 * @return Mfhs_Adapter_Download
 	 */
-	protected function getDownloadAdapter() {
+	protected function getDownloadAdapter(array $options) {
 		require_once 'Mfhs/Adapter/Download.php';
 		return new Mfhs_Adapter_Download($this->config->download);
 	}
@@ -68,13 +74,15 @@ class Mfhs_Controller {
 	 *
 	 * @return Mfhs_Adapter_Upload_Local
 	 */
-	protected function getLocalUploadAdapter() {
+	protected function getLocalUploadAdapter(array $options) {
 		require_once 'Mfhs/Adapter/Upload/Local.php';
 		require_once 'Mfhs/Observer.php';
 		$adapter = new Mfhs_Adapter_Upload_Local($this->config->upload);
 		$adapter->getHttpRequest()
-			->setConfig('connect_timeout', 300)
-			->attach(new Mfhs_Observer());
+			->setConfig('connect_timeout', 300);
+		if (!$options['quiet']) {
+			$adapter->attach(new Mfhs_Observer());
+		}
 		return $adapter;
 	}
 
@@ -83,7 +91,7 @@ class Mfhs_Controller {
 	 *
 	 * @return Mfhs_Adapter_Upload_Http
 	 */
-	protected function getHttpUploadAdapter() {
+	protected function getHttpUploadAdapter(array $options) {
 		require_once 'Mfhs/Adapter/Upload/Http.php';
 		$adapter = new Mfhs_Adapter_Upload_Http();
 		$adapter->setDownloadAdapter($this->getDownloadAdapter())
@@ -96,7 +104,7 @@ class Mfhs_Controller {
 	 *
 	 * @return Mfhs_Adapter_Upload_Feed
 	 */
-	protected function getFeedUploadAdapter() {
+	protected function getFeedUploadAdapter(array $options) {
 		require_once 'Mfhs/Adapter/Upload/Feed.php';
 		$adapter = new Mfhs_Adapter_Upload_Feed();
 		$adapter->setUploadAdapter($this->getHttpUploadAdapter())
