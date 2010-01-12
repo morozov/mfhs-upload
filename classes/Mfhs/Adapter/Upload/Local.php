@@ -21,6 +21,13 @@ require_once 'htmlparser.inc.php';
 class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 
 	/**
+	 * HTTP_Request2 instance.
+	 *
+	 * @var HTTP_Request2 $httpRequest
+	 */
+	protected $httpRequest;
+
+	/**
 	 * Upload script URL.
 	 *
 	 * @var string
@@ -35,11 +42,11 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 	protected $username;
 
 	/**
-	 * Upload script URL.
+	 * Count of tries to upload to a busy server.
 	 *
-	 * @var SplObserver
+	 * @var integer
 	 */
-	protected $observer;
+	protected $triesCount = 3;
 
 	/**
 	 * Constructor.
@@ -54,8 +61,8 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 		if (isset($config->username)) {
 			$this->setUsername($config->username);
 		}
-		if (isset($config->observer)) {
-			$this->setObserver($config->observer);
+		if (isset($config->triesCount)) {
+			$this->setTriesCount($config->triesCount);
 		}
 	}
 
@@ -83,13 +90,37 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 	}
 
 	/**
-	 * Sets upload observer.
+	 * Returns HTTP_Request2 instance.
 	 *
-	 * @param SplObserver $observer
+	 * @return HTTP_Request2
+	 */
+	public function getHttpRequest() {
+		if (!$this->httpRequest instanceof HTTP_Request2) {
+			$this->httpRequest = new HTTP_Request2();
+		}
+		// clear post body for further re-use
+		return $this->httpRequest->setBody('');
+	}
+
+	/**
+	 * Sets HTTP_Request2 instance.
+	 *
+	 * @param HTTP_Request2 $httpRequest
+	 * @return Mfhs_Adapter_Download
+	 */
+	public function setHttpRequest(HTTP_Request2 $httpRequest) {
+		$this->httpRequest = $httpRequest;
+		return $this;
+	}
+
+	/**
+	 * Sets count of tries to upload to a busy server.
+	 *
+	 * @param integer $triesCount
 	 * @return Mfhs_Adapter_Upload_Local
 	 */
-	public function setObserver(SplObserver $observer) {
-		$this->observer = $observer;
+	public function setTriesCount($triesCount) {
+		$this->triesCount = $triesCount;
 		return $this;
 	}
 
@@ -118,23 +149,18 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 
 	public function upload($path) {
 
-		$backup = ini_set('default_socket_timeout', '300');
-
 		$response1 = $this->sendUploadRequest($path);
 
 		list($action, $params) = $this->parseUploadResponse($response1);
 
 		$response2 = $this->sendCompleteRequest($action, $params);
 
-		ini_set('default_socket_timeout', $backup);
 		echo $this->parseCompleteResponse($response2) . PHP_EOL;
 	}
 
 	protected function sendUploadRequest($path) {
 
-		$request = new HTTP_Request2($this->getUploadUrl());
-
-		$url = $request->getUrl();
+		$url = new Net_URL2($this->getUploadUrl());
 		$url->setQueryVariables(array(
 			'upload_id' => $this->generateUID(),
 			'js_on'     => '1',
@@ -142,15 +168,9 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 			'xmode'     => '2',
 		));
 
-		if ($this->observer instanceof SplObserver) {
-			$request->attach($this->observer);
-		}
-
-		return $request
+		$request = $this->getHttpRequest()
+			->setUrl($url)
 			->setMethod(HTTP_Request2::METHOD_POST)
-			->setConfig(array(
-				'connect_timeout' => 300,
-			))
 			->addPostParameter(array(
 				'xmode'     => '2',
 				'pbmode'    => 'inline2',
@@ -160,22 +180,17 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 				'file_key'  => "312e0",
 				'terms'     => 'on',
 			))
-			->addUpload('file_1', $path)
-			->send()
-			->getBody();
+			->addUpload('file_1', $path);
+		return $this->send($request)->getBody();
 	}
 
 	protected function sendCompleteRequest($url, $params) {
-
-		$request = new HTTP_Request2($url);
-
-		return $request->setMethod(HTTP_Request2::METHOD_POST)
-			->setConfig(array(
-				'connect_timeout' => 300,
-			))
-			->addPostParameter($params)
-			->send()
-			->getBody();
+		$request = $this->getHttpRequest()
+			->setUrl($url)
+			->setMethod(HTTP_Request2::METHOD_POST)
+			->setHeader('content-type', 'application/x-www-form-urlencoded')
+			->addPostParameter($params);
+		return $this->send($request)->getBody();
 	}
 
 	/**
@@ -218,6 +233,29 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 		}
 
 		return array($action, $params);
+	}
+
+	/**
+	 * Sends specified http-request.
+	 *
+	 * @param HTTP_Request2 $request
+	 */
+	protected function send(HTTP_Request2 $request) {
+		$tries = 0;
+		do {
+			$tries++;
+			try {
+				return $request->send();
+			} catch (HTTP_Request2_Exception $e) {
+				$isMalformed = 0 === strpos($e->getMessage(), 'Malformed response');
+				if ($isMalformed && $tries < 3) {
+					sleep(10);
+				} else {
+					throw $e;
+				}
+			}
+		}
+		while (true);
 	}
 
 	/**

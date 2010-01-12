@@ -11,6 +11,8 @@ set_include_path(get_include_path()
 require_once 'Mfhs/Config.php';
 require_once 'Mfhs/Controller.php';
 
+ini_set('default_socket_timeout', '300');
+
 try {
 	$config = new Mfhs_Config(require $basedir . '/config.php');
 	$controller = new Mfhs_Controller($config);
@@ -19,3 +21,4 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 	exit(1);
 }
+

@@ -66,8 +66,13 @@ class Mfhs_Observer implements SplObserver {
 	protected function onSentHeaders($headers) {
 		$this->current = 0;
 		$this->divisor = 1;
+		$this->bar = null;
 		$matches = null;
-		if (preg_match('/content-length:\s*(\d+)/i', $headers, $matches)) {
+
+		$isFileUpload = preg_match('/content-type:\smultipart\/form-data/i', $headers);
+
+		if ($isFileUpload
+			 && preg_match('/content-length:\s*(\d+)/i', $headers, $matches)) {
 
 			$base = 1024;
 
@@ -98,7 +103,9 @@ class Mfhs_Observer implements SplObserver {
 	 */
 	protected function onSentBodyPart($length) {
 		$this->current += $length;
-		$this->bar->update($this->current / $this->divisor);
+		if ($this->bar) {
+			$this->bar->update($this->current / $this->divisor);
+		}
 	}
 
 	/**
@@ -107,8 +114,10 @@ class Mfhs_Observer implements SplObserver {
 	 *
 	 */
 	protected function onReceivedHeaders() {
-		// выводим перевод строки после того, как отработает индикатор загрузки
-		echo PHP_EOL;
+		if ($this->bar) {
+			// выводим перевод строки после того, как отработает индикатор загрузки
+			echo PHP_EOL;
+		}
 	}
 
 	/**
