@@ -46,15 +46,15 @@ class Mfhs_Adapter_Download implements SplObserver {
 	/**
 	 * Constructor.
 	 *
-	 * @param Mfhs_Config $config
+	 * @param array $config
 	 * @throws Mfhs_Adapter_Download_Exception
 	 */
 	public function __construct($config = null) {
-		if (isset($config->dir)) {
-			$this->setDir($config->dir);
+		if (isset($config['dir'])) {
+			$this->setDir($config['dir']);
 		}
-		if (isset($config->httpRequest)) {
-			$this->setHttpRequest($config->httpRequest);
+		if (isset($config['httpRequest'])) {
+			$this->setHttpRequest($config['httpRequest']);
 		}
 	}
 

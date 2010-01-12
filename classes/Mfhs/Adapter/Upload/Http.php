@@ -27,15 +27,15 @@ class Mfhs_Adapter_Upload_Http implements Mfhs_Adapter_Upload_Interface {
 	/**
 	 * Constructor.
 	 *
-	 * @param Mfhs_Config $config
+	 * @param array $config
 	 * @throws Mfhs_Adapter_Upload_Exception
 	 */
 	public function __construct($config = null) {
-		if (isset($config->downloadAdapter)) {
-			$this->setDownloadAdapter($config->downloadAdapter);
+		if (isset($config['downloadAdapter'])) {
+			$this->setDownloadAdapter($config['downloadAdapter']);
 		}
-		if (isset($config->uploadAdapter)) {
-			$this->setUploadAdapter($config->uploadAdapter);
+		if (isset($config['uploadAdapter'])) {
+			$this->setUploadAdapter($config['uploadAdapter']);
 		}
 	}
 

@@ -13,8 +13,9 @@ require_once 'Mfhs/Controller.php';
 ini_set('default_socket_timeout', '300');
 
 try {
-	$config = new Mfhs_Config(require $basedir . '/config.php');
-	$controller = new Mfhs_Controller($config);
+	$controller = new Mfhs_Controller();
+	$config = require $basedir . '/config.php';
+	$controller->getBuilder()->setConfig($config);
 	$controller->process();
 } catch (Mfhs_Exception $e) {
 	echo $e->getMessage() . PHP_EOL;

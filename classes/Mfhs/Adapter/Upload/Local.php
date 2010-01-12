@@ -51,18 +51,18 @@ class Mfhs_Adapter_Upload_Local implements Mfhs_Adapter_Upload_Interface {
 	/**
 	 * Constructor.
 	 *
-	 * @param Mfhs_Config $config
+	 * @param array $config
 	 * @throws Mfhs_Adapter_Upload_Exception
 	 */
 	public function __construct($config = null) {
-		if (isset($config->uploadUrl)) {
-			$this->setUploadUrl($config->uploadUrl);
+		if (isset($config['uploadUrl'])) {
+			$this->setUploadUrl($config['uploadUrl']);
 		}
-		if (isset($config->username)) {
-			$this->setUsername($config->username);
+		if (isset($config['username'])) {
+			$this->setUsername($config['username']);
 		}
-		if (isset($config->triesCount)) {
-			$this->setTriesCount($config->triesCount);
+		if (isset($config['triesCount'])) {
+			$this->setTriesCount($config['triesCount']);
 		}
 	}
 
