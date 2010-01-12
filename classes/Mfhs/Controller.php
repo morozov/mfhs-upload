@@ -94,8 +94,8 @@ class Mfhs_Controller {
 	protected function getHttpUploadAdapter(array $options) {
 		require_once 'Mfhs/Adapter/Upload/Http.php';
 		$adapter = new Mfhs_Adapter_Upload_Http();
-		$adapter->setDownloadAdapter($this->getDownloadAdapter())
-			->setUploadAdapter($this->getLocalUploadAdapter());
+		$adapter->setDownloadAdapter($this->getDownloadAdapter($options))
+			->setUploadAdapter($this->getLocalUploadAdapter($options));
 		return $adapter;
 	}
 
@@ -107,8 +107,8 @@ class Mfhs_Controller {
 	protected function getFeedUploadAdapter(array $options) {
 		require_once 'Mfhs/Adapter/Upload/Feed.php';
 		$adapter = new Mfhs_Adapter_Upload_Feed();
-		$adapter->setUploadAdapter($this->getHttpUploadAdapter())
-			->setRegistry($this->getRegistry());
+		$adapter->setUploadAdapter($this->getHttpUploadAdapter($options))
+			->setRegistry($this->getRegistry($options));
 		return $adapter;
 	}
 
@@ -117,7 +117,7 @@ class Mfhs_Controller {
 	 *
 	 * @return Mfhs_Registry
 	 */
-	protected function getRegistry() {
+	protected function getRegistry(array $options) {
 		require_once 'Mfhs/Registry.php';
 		return new Mfhs_Registry($this->config->feed->log);
 	}
