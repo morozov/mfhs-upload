@@ -7,7 +7,6 @@ set_include_path(get_include_path()
 	. PATH_SEPARATOR . $basedir . '/lib'
 	. PATH_SEPARATOR . $basedir . '/classes');
 
-require_once 'Mfhs/Config.php';
 require_once 'Mfhs/Controller.php';
 
 ini_set('default_socket_timeout', '300');
