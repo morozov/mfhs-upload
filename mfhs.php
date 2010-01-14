@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 $basedir = dirname(__FILE__);
