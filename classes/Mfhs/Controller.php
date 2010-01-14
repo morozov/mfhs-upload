@@ -68,7 +68,7 @@ class Mfhs_Controller {
 		foreach ($paths as $path) {
 			if ($is_feed) {
 				$adapter = $this->builder->getFeedUploadAdapter();
-			} elseif (0 === strpos($arg, 'http://') || 0 === strpos($arg, 'https://')) {
+			} elseif (0 === strpos($path, 'http://') || 0 === strpos($path, 'https://')) {
 				$adapter = $this->builder->getHttpUploadAdapter();
 			} else {
 				$adapter = $this->builder->getLocalUploadAdapter();

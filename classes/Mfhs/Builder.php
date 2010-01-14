@@ -87,10 +87,10 @@ class Mfhs_Builder {
 		require_once 'Mfhs/Adapter/Upload/Local.php';
 		require_once 'Mfhs/Observer.php';
 		$adapter = new Mfhs_Adapter_Upload_Local($this->config['upload']);
-		$adapter->getHttpRequest()
-			->setConfig('connect_timeout', 300);
+		$httpRequest = $adapter->getHttpRequest();
+		$httpRequest->setConfig('connect_timeout', 300);
 		if (!$this->config['quiet']) {
-			$adapter->attach(new Mfhs_Observer());
+			$httpRequest->attach(new Mfhs_Observer());
 		}
 		return $adapter;
 	}
