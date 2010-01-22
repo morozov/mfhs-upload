@@ -17,7 +17,7 @@ interface Mfhs_Registry_Interface {
 	 * @param string $key
 	 * @return boolean
 	 */
-	public function isRegistered($key);
+	function isRegistered($key);
 
 	/**
 	 * Registers a key.
@@ -25,5 +25,5 @@ interface Mfhs_Registry_Interface {
 	 * @param string $key
 	 * @throws Mfhs_Registry_Exception
 	 */
-	public function register($key);
+	function register($key);
 }
