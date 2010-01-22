@@ -16,5 +16,5 @@ interface Mfhs_Adapter_Upload_Interface {
 	 * @param string $path
 	 * @throws Mfhs_Adapter_Upload_Exception
 	 */
-	public function upload($path);
+	function upload($path);
 }
