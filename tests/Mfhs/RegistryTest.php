@@ -47,17 +47,25 @@ class Mfhs_RegistryTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * Removes non-empty directory.
 	 */
-	protected function rmdir($path) {
-		$dir = new RecursiveDirectoryIterator($path);
-		foreach (new RecursiveIteratorIterator($dir) as $file) {
-			unlink($file);
-		}
-		foreach ($dir as $subdir) {
-			if (!@rmdir($subdir)) {
-				$this->rmdir($subdir);
+	protected function rmdir($dir) {
+		$iterator = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator($dir),
+			RecursiveIteratorIterator::CHILD_FIRST
+		);
+
+		/** @var SplFileInfo $path */
+		foreach ($iterator as $path) {
+			$baseName = $path->getBasename();
+			if ($baseName == '.' || $baseName == '..') {
+				continue;
+			}
+			if ($path->isDir()) {
+				$this->rmdir($path);
+			} else {
+				unlink($path);
 			}
 		}
-		rmdir($path);
+		rmdir($dir);
 	}
 
 	/**
